@@ -76,7 +76,7 @@ class AppController {
     // Right Panel Tabs
     document.querySelectorAll('#panelRight .panel-tab').forEach(tab => {
       tab.addEventListener('click', (e) => {
-        const targetId = e.currentTarget.dataset.target;
+        const targetId = 'panel-' + e.currentTarget.dataset.panel;
         document.querySelectorAll('#panelRight .panel-tab').forEach(t => t.classList.remove('active'));
         document.querySelectorAll('#panelRight .panel-body').forEach(b => b.classList.remove('active'));
         e.currentTarget.classList.add('active');
@@ -84,7 +84,7 @@ class AppController {
         if (targetBody) targetBody.classList.add('active');
         
         // Refresh editor if switching to code tab
-        if (targetId === 'tabCode' && this.editor) {
+        if (targetId === 'panel-editor' && this.editor) {
           setTimeout(() => this.editor.refresh(), 10);
         }
       });
@@ -93,7 +93,7 @@ class AppController {
     // Bottom Panel Tabs
     document.querySelectorAll('#bottomTabs .bottom-tab').forEach(tab => {
       tab.addEventListener('click', (e) => {
-        const targetId = e.currentTarget.dataset.target;
+        const targetId = 'panel-' + e.currentTarget.dataset.panel;
         document.querySelectorAll('#bottomTabs .bottom-tab').forEach(t => t.classList.remove('active'));
         document.querySelectorAll('.bottom-panel').forEach(b => b.classList.remove('active'));
         e.currentTarget.classList.add('active');
@@ -128,7 +128,7 @@ class AppController {
     });
 
     // 3D Canvas Drop Zone
-    const canvasContainer = document.getElementById('threeCanvas');
+    const canvasContainer = document.getElementById('canvas3d'); // Changed to wrapper
     if (canvasContainer) {
       canvasContainer.addEventListener('dragover', (e) => {
         e.preventDefault(); // Necessary to allow dropping
