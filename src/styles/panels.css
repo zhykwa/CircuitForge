@@ -1,0 +1,96 @@
+/* panels.css — Panel, Tab, and Layout extras */
+
+/* Properties panel form */
+.prop-form { padding: 12px; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; flex: 1; }
+.prop-group { background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--r-md); padding: 10px; }
+.prop-group-title { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+.prop-row { display: flex; align-items: center; gap: 10px; margin-bottom: 7px; }
+.prop-row:last-child { margin-bottom: 0; }
+.prop-label { font-size: 11px; color: var(--text-muted); min-width: 100px; }
+.prop-input {
+  flex: 1; padding: 5px 8px; background: var(--bg-surface);
+  border: 1px solid var(--border); border-radius: var(--r-sm);
+  color: var(--text-primary); font-size: 12px; outline: none;
+}
+.prop-input:focus { border-color: var(--primary); }
+.prop-select {
+  flex: 1; padding: 5px 8px; background: var(--bg-surface);
+  border: 1px solid var(--border); border-radius: var(--r-sm);
+  color: var(--text-primary); font-size: 12px; outline: none; cursor: pointer;
+}
+.prop-select:focus { border-color: var(--primary); }
+.prop-checkbox { accent-color: var(--primary); }
+.prop-slider { flex: 1; accent-color: var(--primary); }
+.prop-unit { font-size: 11px; color: var(--text-muted); min-width: 30px; }
+
+/* Component header in properties */
+.comp-prop-header {
+  display: flex; align-items: center; gap: 12px; padding: 12px 14px;
+  border-bottom: 1px solid var(--border); flex-shrink: 0;
+}
+.comp-prop-icon { width: 44px; height: 44px; border-radius: var(--r-md); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; font-family: var(--font-code); flex-shrink: 0; }
+.comp-prop-name { font-size: 15px; font-weight: 700; color: var(--text-primary); }
+.comp-prop-part { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+.comp-prop-delete {
+  margin-left: auto; padding: 6px 12px; background: none;
+  border: 1px solid rgba(239,68,68,0.3); color: var(--danger);
+  border-radius: var(--r-sm); cursor: pointer; font-size: 11px; font-weight: 600;
+  transition: all var(--t-fast);
+}
+.comp-prop-delete:hover { background: rgba(239,68,68,0.1); border-color: var(--danger); }
+
+/* Pin map table */
+.pin-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+.pin-table th { padding: 5px 8px; text-align: left; color: var(--text-muted); font-weight: 600; border-bottom: 1px solid var(--border); }
+.pin-table td { padding: 5px 8px; border-bottom: 1px solid rgba(255,255,255,0.03); }
+.pin-table tr:last-child td { border-bottom: none; }
+.pin-badge { display: inline-block; padding: 1px 6px; border-radius: 10px; font-size: 10px; font-weight: 700; }
+.pin-type-power  { background: rgba(239,68,68,0.2); color: #fca5a5; }
+.pin-type-ground { background: rgba(30,41,59,0.8); color: var(--text-dim); }
+.pin-type-digital{ background: rgba(16,185,129,0.15); color: var(--secondary); }
+.pin-type-analog { background: rgba(245,158,11,0.15); color: var(--accent); }
+.pin-type-i2c    { background: rgba(99,102,241,0.2); color: var(--primary-light); }
+.pin-type-spi    { background: rgba(249,115,22,0.2); color: var(--warning); }
+.pin-type-uart   { background: rgba(245,158,11,0.15); color: var(--accent); }
+.pin-type-pwm    { background: rgba(6,182,212,0.15); color: var(--info); }
+
+/* Sim value sliders */
+.sim-value-section { padding: 10px 14px; border-top: 1px solid var(--border); flex-shrink: 0; }
+.sim-value-title { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+.sim-value-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 12px; }
+.sim-value-row label { color: var(--text-muted); min-width: 80px; }
+.sim-value-row input[type=range] { flex: 1; accent-color: var(--primary); }
+.sim-value-display { min-width: 60px; text-align: right; font-family: var(--font-code); font-size: 12px; color: var(--primary-light); }
+
+/* Tooltip */
+.tooltip {
+  position: fixed; z-index: 3000;
+  background: var(--bg-elevated); border: 1px solid var(--border-bright);
+  border-radius: var(--r-sm); padding: 5px 10px;
+  font-size: 11px; color: var(--text-primary);
+  pointer-events: none; box-shadow: var(--shadow-sm);
+  animation: fadeIn 0.1s ease;
+}
+
+/* Loading spinner */
+.spinner {
+  width: 20px; height: 20px; border-radius: 50%;
+  border: 2px solid var(--border-bright); border-top-color: var(--primary);
+  animation: spin 0.7s linear infinite; display: inline-block;
+}
+
+/* Notification toast */
+.toast {
+  position: fixed; bottom: 48px; right: 16px; z-index: 4000;
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 16px; border-radius: var(--r-md);
+  background: var(--bg-elevated); border: 1px solid var(--border-bright);
+  box-shadow: var(--shadow-md); max-width: 360px;
+  animation: slideUp 0.2s ease;
+}
+.toast.success { border-left: 3px solid var(--secondary); }
+.toast.error   { border-left: 3px solid var(--danger); }
+.toast.info    { border-left: 3px solid var(--primary); }
+.toast.warning { border-left: 3px solid var(--accent); }
+.toast-msg { font-size: 12px; color: var(--text-primary); flex: 1; }
+.toast-close { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 14px; }

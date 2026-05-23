@@ -1,0 +1,51 @@
+# CircuitForge .gitignore
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+.yarn-integrity
+
+# Electron build output
+dist/
+out/
+build/
+release/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/settings.json
+.vscode/launch.json
+.idea/
+*.suo
+*.user
+
+# Logs
+logs/
+*.log
+*.log.*
+
+# Temp
+*.tmp
+*.temp
+.cache/
+
+# Antigravity AI temp
+.gemini/
+brain/
+
+# Arduino CLI binaries (download separately)
+arduino-cli.exe
+arduino-cli
+
+# User project saves (not tracked)
+projects/*.cfproj
+
+# Secrets / config
+.env
+.env.local
+config.local.js

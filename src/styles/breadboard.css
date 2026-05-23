@@ -1,0 +1,130 @@
+/* breadboard.css — Component Library Panel Styles */
+
+/* ── Component Sections ──────────────────────────────────────────── */
+.comp-section { margin-bottom: 4px; }
+.comp-section-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 7px 10px; cursor: pointer; border-radius: var(--r-sm);
+  font-size: 12px; font-weight: 600; color: var(--text-muted);
+  transition: background var(--t-fast); user-select: none;
+}
+.comp-section-header:hover { background: var(--bg-hover); color: var(--text-primary); }
+.comp-section-header .chevron { transition: transform var(--t-fast); font-size: 10px; }
+.comp-section.collapsed .chevron { transform: rotate(-90deg); }
+.comp-section.collapsed .comp-grid { display: none; }
+
+/* ── Component Grid ──────────────────────────────────────────────── */
+.comp-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 4px; padding: 4px 2px 8px;
+}
+
+/* ── Component Item Card ─────────────────────────────────────────── */
+.comp-item {
+  display: flex; flex-direction: column; align-items: center; gap: 5px;
+  padding: 8px 4px; border-radius: var(--r-md);
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  cursor: grab; text-align: center;
+  transition: all var(--t-med);
+  position: relative; overflow: hidden;
+}
+.comp-item::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(135deg, transparent 40%, rgba(99,102,241,0.04));
+  opacity: 0; transition: opacity var(--t-fast);
+}
+.comp-item:hover {
+  border-color: rgba(99,102,241,0.4);
+  background: var(--bg-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3), 0 0 0 1px rgba(99,102,241,0.2);
+}
+.comp-item:hover::before { opacity: 1; }
+.comp-item:active { cursor: grabbing; transform: scale(0.95); }
+.comp-item.dragging { opacity: 0.5; }
+
+/* ── Component Icons ─────────────────────────────────────────────── */
+.comp-icon {
+  width: 40px; height: 32px; border-radius: var(--r-sm);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px; font-weight: 800; letter-spacing: 0.3px;
+  font-family: var(--font-code); flex-shrink: 0;
+}
+.comp-label {
+  font-size: 10px; font-weight: 500; color: var(--text-muted);
+  line-height: 1.2; word-break: break-word;
+}
+.comp-item:hover .comp-label { color: var(--text-primary); }
+
+/* Board Icons */
+.board-icon { background: linear-gradient(135deg, #14532d, #166534); color: #4ade80; border: 1px solid rgba(74,222,128,0.2); }
+.board-icon.esp32 { background: linear-gradient(135deg, #1e3a5f, #1e40af); color: #60a5fa; border: 1px solid rgba(96,165,250,0.2); }
+.board-icon.esp8266 { background: linear-gradient(135deg, #134e4a, #0f766e); color: #2dd4bf; border: 1px solid rgba(45,212,191,0.2); }
+.board-icon.stm32 { background: linear-gradient(135deg, #450a0a, #7f1d1d); color: #fca5a5; border: 1px solid rgba(252,165,165,0.2); }
+.board-icon.pico { background: linear-gradient(135deg, #1a2e05, #365314); color: #a3e635; border: 1px solid rgba(163,230,53,0.2); }
+
+/* Sensor Icons */
+.sensor-icon { background: linear-gradient(135deg, #052e16, #065f46); color: #34d399; border: 1px solid rgba(52,211,153,0.2); }
+
+/* Actuator Icons */
+.actuator-icon { background: linear-gradient(135deg, #451a03, #78350f); color: #fbbf24; border: 1px solid rgba(251,191,36,0.2); }
+
+/* Display Icons */
+.display-icon { background: linear-gradient(135deg, #2e1065, #4c1d95); color: #c4b5fd; border: 1px solid rgba(196,181,253,0.2); }
+
+/* Communication Icons */
+.comms-icon { background: linear-gradient(135deg, #083344, #0c4a6e); color: #38bdf8; border: 1px solid rgba(56,189,248,0.2); }
+
+/* Input Icons */
+.input-icon { background: linear-gradient(135deg, #500724, #831843); color: #f9a8d4; border: 1px solid rgba(249,168,212,0.2); }
+
+/* LED Icons */
+.led-icon { background: linear-gradient(135deg, #713f12, #92400e); color: #fde68a; border: 1px solid rgba(253,230,138,0.2); }
+.led-icon.red { background: linear-gradient(135deg, #450a0a, #7f1d1d); color: #fca5a5; border: 1px solid rgba(252,165,165,0.3); box-shadow: 0 0 8px rgba(239,68,68,0.2); }
+.led-icon.green { background: linear-gradient(135deg, #052e16, #14532d); color: #86efac; border: 1px solid rgba(134,239,172,0.3); box-shadow: 0 0 8px rgba(34,197,94,0.2); }
+.led-icon.blue { background: linear-gradient(135deg, #172554, #1e3a8a); color: #93c5fd; border: 1px solid rgba(147,197,253,0.3); box-shadow: 0 0 8px rgba(59,130,246,0.2); }
+.led-icon.rgb { background: linear-gradient(135deg, #7f1d1d, #4c1d95, #1e3a8a); color: #fff; border: 1px solid rgba(255,255,255,0.2); }
+.led-icon.neo { background: linear-gradient(135deg, #ff0080, #ff8c00, #40e0d0); color: #fff; border: 1px solid rgba(255,255,255,0.3); }
+
+/* Robot Icons */
+.robot-icon { background: linear-gradient(135deg, #431407, #7c2d12); color: #fdba74; border: 1px solid rgba(253,186,116,0.2); }
+
+/* Passive Icons */
+.passive-icon { background: linear-gradient(135deg, #0f172a, #1e293b); color: #94a3b8; border: 1px solid rgba(148,163,184,0.2); }
+
+/* ── Drag Ghost ──────────────────────────────────────────────────── */
+.drag-ghost {
+  position: fixed; pointer-events: none; z-index: 9999;
+  background: var(--bg-active); border: 2px solid var(--primary);
+  border-radius: var(--r-md); padding: 8px 12px;
+  font-size: 12px; font-weight: 600; color: var(--primary-light);
+  box-shadow: var(--shadow-glow);
+  backdrop-filter: blur(12px);
+}
+
+/* ── Component Context Menu ──────────────────────────────────────── */
+.context-menu {
+  position: fixed; z-index: 2000; min-width: 160px;
+  background: var(--bg-elevated); border: 1px solid var(--border-bright);
+  border-radius: var(--r-md); box-shadow: var(--shadow-md);
+  padding: 4px; animation: fadeIn 0.1s ease;
+}
+.context-menu-item {
+  padding: 7px 12px; border-radius: var(--r-sm); cursor: pointer;
+  font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 8px;
+  transition: all var(--t-fast);
+}
+.context-menu-item:hover { background: var(--bg-hover); color: var(--text-primary); }
+.context-menu-item.danger:hover { background: rgba(239,68,68,0.15); color: var(--danger); }
+.context-menu-sep { height: 1px; background: var(--border); margin: 4px 0; }
+
+/* ── Board Color Strip ───────────────────────────────────────────── */
+.board-color-uno    { background: #22c55e; }
+.board-color-mega   { background: #3b82f6; }
+.board-color-nano   { background: #10b981; }
+.board-color-esp32  { background: #6366f1; }
+.board-color-esp32s3{ background: #8b5cf6; }
+.board-color-esp8266{ background: #06b6d4; }
+.board-color-stm32  { background: #ef4444; }
+.board-color-pico   { background: #84cc16; }

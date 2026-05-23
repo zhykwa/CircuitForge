@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CircuitForge — Advanced IoT & Robotics Simulator</title>
+  <meta name="description" content="Simulator mikrokontroler desktop dengan 3D canvas, multi-board, 276+ komponen, Arduino CLI, kalibrasi, dan marketplace komunitas.">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="styles/main.css">
+  <link rel="stylesheet" href="styles/panels.css">
+  <link rel="stylesheet" href="styles/editor.css">
+  <link rel="stylesheet" href="styles/breadboard.css">
+  <link rel="stylesheet" href="styles/instruments.css">
+  <link rel="stylesheet" href="styles/components.css">
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!--  TITLEBAR                                                     -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<div id="titlebar">
+  <div class="titlebar-left">
+    <div class="app-logo">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="#6366f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span class="app-name">CircuitForge</span>
+      <span class="app-version">v1.0.0</span>
+    </div>
+    <div class="titlebar-menu">
+      <button class="menu-btn" data-menu="file">File</button>
+      <button class="menu-btn" data-menu="edit">Edit</button>
+      <button class="menu-btn" data-menu="view">Tampilan</button>
+      <button class="menu-btn" data-menu="board">Board</button>
+      <button class="menu-btn" data-menu="tools">Tools</button>
+      <button class="menu-btn" data-menu="help">Bantuan</button>
+    </div>
+  </div>
+  <div class="titlebar-center">
+    <div class="project-title-wrap">
+      <span class="project-unsaved-dot" id="unsavedDot" style="display:none">●</span>
+      <span id="projectTitle" class="project-title" contenteditable="true" spellcheck="false">Proyek Baru</span>
+    </div>
+  </div>
+  <div class="titlebar-right">
+    <button class="tb-btn" id="btnMinimize">─</button>
+    <button class="tb-btn" id="btnMaximize">□</button>
+    <button class="tb-btn tb-btn-close" id="btnClose">✕</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!--  MAIN TOOLBAR                                                 -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<div id="toolbar">
+  <!-- Mode Toggle -->
+  <div class="toolbar-group">
+    <button class="mode-btn active" id="modeDesign" title="Mode Desain">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+      Desain
+    </button>
+    <button class="mode-btn" id="modeSimulate" title="Mode Simulasi">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      Simulasi
+    </button>
+    <button class="mode-btn" id="modeSchematic" title="Schematic">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      Skematik
+    </button>
+  </div>
+
+  <div class="toolbar-sep"></div>
+
+  <!-- Simulation Controls -->
+  <div class="toolbar-group" id="simControls">
+    <button class="sim-btn" id="btnRunAll" title="Jalankan Semua Board">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      Jalankan Semua
+    </button>
+    <button class="sim-btn sim-stop" id="btnStopAll" disabled title="Hentikan Semua">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+      Hentikan
+    </button>
+  </div>
+
+  <div class="toolbar-sep"></div>
+
+  <!-- Canvas Controls -->
+  <div class="toolbar-group">
+    <button class="tool-btn" id="toolSelect" title="Pilih (V)" data-tool="select">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4l7.07 17 2.51-7.39L21 11.07z"/></svg>
+    </button>
+    <button class="tool-btn" id="toolMove" title="Pindah (G)" data-tool="move">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 9l-3 3 3 3M9 5l3-3 3 3M15 19l-3 3-3-3M19 9l3 3-3 3M12 12h.01M3 12h18M12 3v18"/></svg>
+    </button>
+    <button class="tool-btn" id="toolRotate" title="Putar (R)" data-tool="rotate">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0118.8-4.3M22 12.5a10 10 0 01-18.8 4.2"/></svg>
+    </button>
+    <button class="tool-btn" id="toolWire" title="Kabel (W)" data-tool="wire">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12h16M4 6l16 12M4 18l16-12" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+
+  <div class="toolbar-sep"></div>
+
+  <!-- View Controls -->
+  <div class="toolbar-group">
+    <select class="toolbar-select" id="cameraView" title="Tampilan Kamera">
+      <option value="perspective">Perspektif</option>
+      <option value="top">Atas</option>
+      <option value="front">Depan</option>
+      <option value="side">Samping</option>
+      <option value="isometric">Isometrik</option>
+    </select>
+    <button class="tool-btn" id="btnResetView" title="Reset Tampilan (Numpad 0)">⌂</button>
+    <button class="tool-btn" id="btnToggleGrid" title="Grid (G)">⊞</button>
+  </div>
+
+  <div class="toolbar-sep"></div>
+
+  <!-- Compile & Upload -->
+  <div class="toolbar-group">
+    <button class="action-btn compile" id="btnCompile" title="Kompilasi Kode (Ctrl+B)">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+      Kompilasi
+    </button>
+    <button class="action-btn upload" id="btnUpload" title="Upload ke Board (Ctrl+U)">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0018 9h-1.26A8 8 0 103 16.3"/></svg>
+      Upload
+    </button>
+  </div>
+
+  <div class="toolbar-spacer"></div>
+
+  <!-- Right tools -->
+  <div class="toolbar-group">
+    <button class="tool-btn" id="btnLibraryManager" title="Library Manager">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+      Library
+    </button>
+    <button class="tool-btn" id="btnMarketplace" title="Marketplace">🏪</button>
+    <button class="tool-btn" id="btnSettings" title="Pengaturan">⚙️</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!--  MAIN LAYOUT                                                  -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<div id="appLayout">
+
+  <!-- ── LEFT PANEL: Component Library ─────────────────────────── -->
+  <div id="panelLeft" class="panel">
+    <div class="panel-header">
+      <span class="panel-title">Komponen</span>
+      <input type="search" id="componentSearch" placeholder="Cari komponen..." class="search-input">
+    </div>
+    <div class="panel-content">
+
+      <!-- Board Section -->
+      <div class="comp-section">
+        <div class="comp-section-header" data-section="boards">
+          <span>🖥️ Mikrokontroler</span><span class="chevron">▾</span>
+        </div>
+        <div class="comp-grid" id="sectionBoards">
+          <div class="comp-item" draggable="true" data-comp="arduino:avr:uno" data-name="Arduino Uno R3">
+            <div class="comp-icon board-icon">UNO</div>
+            <div class="comp-label">Arduino Uno</div>
+          </div>
+          <div class="comp-item" draggable="true" data-comp="arduino:avr:mega" data-name="Arduino Mega 2560">
+            <div class="comp-icon board-icon">MEGA</div>
+            <div class="comp-label">Mega 2560</div>
+          </div>
+          <div class="comp-item" draggable="true" data-comp="arduino:avr:nano" data-name="Arduino Nano">
+            <div class="comp-icon board-icon">NANO</div>
+            <div class="comp-label">Arduino Nano</div>
+          </div>
+          <div class="comp-item" draggable="true" data-comp="esp32:esp32:esp32" data-name="ESP32 DevKit V1">
+            <div class="comp-icon board-icon esp32">ESP32</div>
+            <div class="comp-label">ESP32</div>
+          </div>
+          <div class="comp-item" draggable="true" data-comp="esp32:esp32:esp32s3" data-name="ESP32-S3">
+            <div class="comp-icon board-icon esp32">S3</div>
+            <div class="comp-label">ESP32-S3</div>
+          </div>
+          <div class="comp-item" draggable="true" data-comp="esp8266:esp8266:nodemcuv2" data-name="NodeMCU v2">
+            <div class="comp-icon board-icon esp8266">8266</div>
+            <div class="comp-label">NodeMCU v2</div>
+          </div>
+          <div class="comp-item" draggable="true" data-comp="STMicroelectronics:stm32:GenF1" data-name="STM32 Blue Pill">
+            <div class="comp-icon board-icon stm32">STM</div>
+            <div class="comp-label">STM32 Blue Pill</div>
+          </div>
+          <div class="comp-item" draggable="true" data-comp="rp2040:rp2040:rpipico" data-name="Raspberry Pi Pico">
+            <div class="comp-icon board-icon pico">PICO</div>
+            <div class="comp-label">RPi Pico</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sensor Lingkungan -->
+      <div class="comp-section">
+        <div class="comp-section-header" data-section="env-sensors">
+          <span>🌡️ Sensor Lingkungan</span><span class="chevron">▾</span>
+        </div>
+        <div class="comp-grid" id="sectionEnvSensors">
+          <div class="comp-item" draggable="true" data-comp="DHT22" data-name="DHT22"><div class="comp-icon sensor-icon">DHT22</div><div class="comp-label">DHT22</div></div>
+          <div class="comp-item" draggable="true" data-comp="DHT11" data-name="DHT11"><div class="comp-icon sensor-icon">DHT11</div><div class="comp-label">DHT11</div></div>
+          <div class="comp-item" draggable="true" data-comp="DS18B20" data-name="DS18B20"><div class="comp-icon sensor-icon">DS18</div><div class="comp-label">DS18B20</div></div>
+          <div class="comp-item" draggable="true" data-comp="BME280" data-name="BME280"><div class="comp-icon sensor-icon">BME280</div><div class="comp-label">BME280</div></div>
+          <div class="comp-item" draggable="true" data-comp="BMP280" data-name="BMP280"><div class="comp-icon sensor-icon">BMP280</div><div class="comp-label">BMP280</div></div>
+          <div class="comp-item" draggable="true" data-comp="SHT31" data-name="SHT31"><div class="comp-icon sensor-icon">SHT31</div><div class="comp-label">SHT31</div></div>
+          <div class="comp-item" draggable="true" data-comp="LM35DZ" data-name="LM35DZ"><div class="comp-icon sensor-icon">LM35</div><div class="comp-label">LM35</div></div>
+          <div class="comp-item" draggable="true" data-comp="MLX90614" data-name="MLX90614"><div class="comp-icon sensor-icon">MLX</div><div class="comp-label">MLX90614</div></div>
+        </div>
+      </div>
+
+      <!-- Sensor Jarak -->
+      <div class="comp-section">
+        <div class="comp-section-header" data-section="distance-sensors">
+          <span>📡 Sensor Jarak & Gerak</span><span class="chevron">▾</span>
+        </div>
+        <div class="comp-grid" id="sectionDistanceSensors">
+          <div class="comp-item" draggable="true" data-comp="HC-SR04" data-name="HC-SR04"><div class="comp-icon sensor-icon">SONAR</div><div class="comp-label">HC-SR04</div></div>
+          <div class="comp-item" draggable="true" data-comp="VL53L0X" data-name="VL53L0X"><div class="comp-icon sensor-icon">ToF</div><div class="comp-label">VL53L0X</div></div>
+          <div class="comp-item" draggable="true" data-comp="HC-SR501" data-name="HC-SR501 PIR"><div class="comp-icon sensor-icon">PIR</div><div class="comp-label">PIR HC-SR501</div></div>
+          <div class="comp-item" draggable="true" data-comp="MPU-6050" data-name="MPU-6050"><div class="comp-icon sensor-icon">IMU</div><div class="comp-label">MPU-6050</div></div>
+          <div class="comp-item" draggable="true" data-comp="TCRT5000" data-name="TCRT5000"><div class="comp-icon sensor-icon">IR</div><div class="comp-label">TCRT5000</div></div>
+          <div class="comp-item" draggable="true" data-comp="HX711" data-name="HX711 Load Cell"><div class="comp-icon sensor-icon">HX711</div><div class="comp-label">HX711</div></div>
+        </div>
+      </div>
+
+      <!-- Gas Sensors -->
+      <div class="comp-section">
+        <div class="comp-section-header" data-section="gas-sensors">
+          <span>🌫️ Sensor Gas</span><span class="chevron">▾</span>
+        </div>
+        <div class="comp-grid" id="sectionGasSensors">
+          <div class="comp-item" draggable="true" data-comp="MQ-2" data-name="MQ-2 Gas Sensor"><div class="comp-icon sensor-icon">MQ-2</div><div class="comp-label">MQ-2</div></div>
+          <div class="comp-item" draggable="true" data-comp="MQ-7" data-name="MQ-7 CO Sensor"><div class="comp-icon sensor-icon">MQ-7</div><div class="comp-label">MQ-7 CO</div></div>
+          <div class="comp-item" draggable="true" data-comp="MQ-135" data-name="MQ-135 Air Quality"><div class="comp-icon sensor-icon">MQ-135</div><div class="comp-label">MQ-135</div></div>
+          <div class="comp-item" draggable="true" data-comp="SCD30" data-name="SCD30 CO2"><div class="comp-icon sensor-icon">SCD30</div><div class="comp-label">SCD30 CO₂</div></div>
+        </div>
+      </div>
+
+      <!-- Display -->
+      <div class="comp-section">
+        <div class="comp-section-header" data-section="displays">
+          <span>🖥️ Display</span><span class="chevron">▾</span>
+        </div>
+        <div class="comp-grid" id="sectionDisplays">
+          <div class="comp-item" draggable="true" data-comp="SSD1306-128x64" data-name="OLED SSD1306 128x64"><div class="comp-icon display-icon">OLED</div><div class="comp-label">OLED SSD1306</div></div>
+          <div class="comp-item" draggable="true" data-comp="LCD-16x2-I2C" data-name="LCD 16x2 I2C"><div class="comp-icon display-icon">LCD</div><div class="comp-label">LCD 16×2</div></div>
+          <div class="comp-item" draggable="true" data-comp="LCD-20x4-I2C" data-name="LCD 20x4 I2C"><div class="comp-icon display-icon">LCD</div><div class="comp-label">LCD 20×4</div></div>
+          <div class="comp-item" draggable="true" data-comp="ILI9341" data-name="TFT ILI9341 2.4\""><div class="comp-icon display-icon">TFT</div><div class="comp-label">TFT ILI9341</div></div>
+          <div class="comp-item" draggable="true" data-comp="TM1637" data-name="TM1637 7-Segment"><div class="comp-icon display-icon">7SEG</div><div class="comp-label">TM1637</div></div>
+          <div class="comp-item" draggable="true" data-comp="MAX7219-Matrix" data-name="MAX7219 LED Matrix"><div class="comp-icon display-icon">MAT</div><div class="comp-label">LED Matrix</div></div>
+        </div>
+      </div>
+
+      <!-- Actuators -->
+      <div class="comp-section">
+        <div class="comp-section-header" data-section="actuators">
+          <span>⚙️ Aktuator & Motor</span><span class="chevron">▾</span>
+        </div>
+        <div class="comp-grid" id="sectionActuators">
+          <div class="comp-item" draggable="true" data-comp="SG90" data-name="SG90 Servo 9g"><div class="comp-icon actuator-icon">SG90</div><div class="comp-label">SG90 Servo</div></div>
+          <div class="comp-item" draggable="true" data-comp="MG996R" data-name="MG996R Servo"><div class="comp-icon actuator-icon">MG996</div><div class="comp-label">MG996R</div></div>
+          <div class="comp-item" draggable="true" data-comp="28BYJ-48" data-name="28BYJ-48 Stepper"><div class="comp-icon actuator-icon">STEP</div><div class="comp-label">28BYJ-48</div></div>
+          <div class="comp-item" draggable="true" data-comp="L298N" data-name="L298N Motor Driver"><div class="comp-icon actuator-icon">L298N</div><div class="comp-label">L298N</div></div>
+          <div class="comp-item" draggable="true" data-comp="RELAY-5V" data-name="Relay 5V SPDT"><div class="comp-icon actuator-icon">RELAY</div><div class="comp-label">Relay 5V</div></div>
+          <div class="comp-item" draggable="true" data-comp="DC-MOTOR" data-name="DC Motor"><div class="comp-icon actuator-icon">DC</div><div class="comp-label">DC Motor</div></div>
+        </div>
+      </div>
+
+      <!-- Communication -->
+      <div class="comp-section">
+        <div class="comp-section-header" data-section="comms">
+          <span>📡 Komunikasi</span><span class="chevron">▾</span>
+        </div>
+        <div class="comp-grid" id="sectionComms">
+          <div class="comp-item" draggable="true" data-comp="HC-05" data-name="HC-05 Bluetooth"><div class="comp-icon comms-icon">BT</div><div class="comp-label">HC-05</div></div>
+          <div class="comp-item" draggable="true" data-comp="NRF24L01" data-name="NRF24L01 Wireless"><div class="comp-icon comms-icon">NRF</div><div class="comp-label">NRF24L01</div></div>
+          <div class="comp-item" draggable="true" data-comp="SIM800L" data-name="SIM800L GSM"><div class="comp-icon comms-icon">GSM</div><div class="comp-label">SIM800L</div></div>
+          <div class="comp-item" draggable="true" data-comp="SX1278" data-name="SX1278 LoRa 433MHz"><div class="comp-icon comms-icon">LORA</div><div class="comp-label">LoRa SX1278</div></div>
+          <div class="comp-item" draggable="true" data-comp="MFRC522" data-name="MFRC522 RFID"><div class="comp-icon comms-icon">RFID</div><div class="comp-label">RFID RC522</div></div>
+        </div>
+      </div>
+
+      <!-- Input -->
+      <div class="comp-section">
+        <div class="comp-section-header" data-section="inputs">
+          <span>🎮 Input & Kontrol</span><span class="chevron">▾</span>
+        </div>
+        <div class="comp-grid" id="sectionInputs">
+          <div class="comp-item" draggable="true" data-comp="PUSH-BUTTON" data-name="Push Button"><div class="comp-icon input-icon">BTN</div><div class="comp-label">Push Button</div></div>
+          <div class="comp-item" draggable="true" data-comp="KY-040" data-name="KY-040 Rotary Encoder"><div class="comp-icon input-icon">ENC</div><div class="comp-label">Encoder KY-040</div></div>
+          <div class="comp-item" draggable="true" data-comp="KY-023" data-name="KY-023 Joystick"><div class="comp-icon input-icon">JOY</div><div class="comp-label">Joystick</div></div>
+          <div class="comp-item" draggable="true" data-comp="KEYPAD-4X4" data-name="Keypad 4x4"><div class="comp-icon input-icon">KEY</div><div class="comp-label">Keypad 4×4</div></div>
+          <div class="comp-item" draggable="true" data-comp="POTENTIOMETER" data-name="Potentiometer 10K"><div class="comp-icon input-icon">POT</div><div class="comp-label">Potensiometer</div></div>
+        </div>
+      </div>
+
+      <!-- LED & Light -->
+      <div class="comp-section">
+        <div class="comp-section-header" data-section="leds">
+          <span>💡 LED & Cahaya</span><span class="chevron">▾</span>
+        </div>
+        <div class="comp-grid" id="sectionLEDs">
+          <div class="comp-item" draggable="true" data-comp="LED-RED" data-name="LED Merah"><div class="comp-icon led-icon red">LED</div><div class="comp-label">LED Merah</div></div>
+          <div class="comp-item" draggable="true" data-comp="LED-GREEN" data-name="LED Hijau"><div class="comp-icon led-icon green">LED</div><div class="comp-label">LED Hijau</div></div>
+          <div class="comp-item" draggable="true" data-comp="LED-BLUE" data-name="LED Biru"><div class="comp-icon led-icon blue">LED</div><div class="comp-label">LED Biru</div></div>
+          <div class="comp-item" draggable="true" data-comp="LED-RGB" data-name="RGB LED"><div class="comp-icon led-icon rgb">RGB</div><div class="comp-label">LED RGB</div></div>
+          <div class="comp-item" draggable="true" data-comp="WS2812B" data-name="WS2812B NeoPixel"><div class="comp-icon led-icon neo">NEO</div><div class="comp-label">NeoPixel</div></div>
+          <div class="comp-item" draggable="true" data-comp="BUZZER" data-name="Buzzer Active"><div class="comp-icon led-icon">BUZ</div><div class="comp-label">Buzzer</div></div>
+        </div>
+      </div>
+
+      <!-- Passive -->
+      <div class="comp-section">
+        <div class="comp-section-header" data-section="passive">
+          <span>🔌 Komponen Pasif</span><span class="chevron">▾</span>
+        </div>
+        <div class="comp-grid" id="sectionPassive">
+          <div class="comp-item" draggable="true" data-comp="RESISTOR" data-name="Resistor"><div class="comp-icon passive-icon">R</div><div class="comp-label">Resistor</div></div>
+          <div class="comp-item" draggable="true" data-comp="CAPACITOR-CER" data-name="Kapasitor Keramik"><div class="comp-icon passive-icon">C</div><div class="comp-label">Kapasitor</div></div>
+          <div class="comp-item" draggable="true" data-comp="NPN-BC547" data-name="Transistor NPN BC547"><div class="comp-icon passive-icon">NPN</div><div class="comp-label">NPN BC547</div></div>
+          <div class="comp-item" draggable="true" data-comp="MOSFET-IRLZ44N" data-name="MOSFET IRLZ44N"><div class="comp-icon passive-icon">MOS</div><div class="comp-label">MOSFET</div></div>
+          <div class="comp-item" draggable="true" data-comp="DIODE-1N4007" data-name="Dioda 1N4007"><div class="comp-icon passive-icon">D</div><div class="comp-label">Dioda</div></div>
+        </div>
+      </div>
+
+      <!-- Robotics -->
+      <div class="comp-section">
+        <div class="comp-section-header" data-section="robotics">
+          <span>🤖 Robotika</span><span class="chevron">▾</span>
+        </div>
+        <div class="comp-grid" id="sectionRobotics">
+          <div class="comp-item" draggable="true" data-comp="ROBOT-ARM-BASE" data-name="Robot Arm Base"><div class="comp-icon robot-icon">ARM</div><div class="comp-label">Arm Base</div></div>
+          <div class="comp-item" draggable="true" data-comp="ROBOT-ARM-SEGMENT" data-name="Arm Segment"><div class="comp-icon robot-icon">SEG</div><div class="comp-label">Arm Segment</div></div>
+          <div class="comp-item" draggable="true" data-comp="ROBOT-GRIPPER-2F" data-name="Gripper 2 Jari"><div class="comp-icon robot-icon">GRIP</div><div class="comp-label">Gripper</div></div>
+          <div class="comp-item" draggable="true" data-comp="DIFF-DRIVE-BASE" data-name="Differential Drive Base"><div class="comp-icon robot-icon">DIFF</div><div class="comp-label">Diff Drive</div></div>
+          <div class="comp-item" draggable="true" data-comp="4WD-CHASSIS" data-name="4WD Chassis"><div class="comp-icon robot-icon">4WD</div><div class="comp-label">4WD Base</div></div>
+          <div class="comp-item" draggable="true" data-comp="PAN-TILT" data-name="Pan-Tilt Mount"><div class="comp-icon robot-icon">PT</div><div class="comp-label">Pan-Tilt</div></div>
+          <div class="comp-item" draggable="true" data-comp="DRONE-FRAME" data-name="Drone X-Frame"><div class="comp-icon robot-icon">DRONE</div><div class="comp-label">Drone Frame</div></div>
+        </div>
+      </div>
+
+    </div><!-- /panel-content -->
+  </div>
+
+  <!-- ── CENTER: 3D Canvas ───────────────────────────────────── -->
+  <div id="panelCenter">
+
+    <!-- Board Tabs -->
+    <div id="boardTabs">
+      <div class="board-tab active" id="tab_canvas" data-target="canvas3d">
+        <span class="board-tab-dot" style="background:#6366f1"></span>
+        Canvas 3D
+      </div>
+      <!-- Dynamic board tabs inserted here -->
+      <button class="add-board-btn" id="btnAddBoard" title="Tambah Board Baru">+ Tambah Board</button>
+    </div>
+
+    <!-- 3D Canvas -->
+    <div id="canvas3d">
+      <canvas id="threeCanvas"></canvas>
+
+      <!-- Canvas Overlays -->
+      <div id="canvasOverlay">
+        <!-- Sim status badges per board -->
+        <div id="simStatusBar"></div>
+
+        <!-- Camera info -->
+        <div id="cameraInfo">
+          <span id="cameraInfoText">Perspektif | 3D</span>
+        </div>
+
+        <!-- Drop hint -->
+        <div id="dropHint" class="hidden">
+          <div class="drop-hint-box">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="rgba(99,102,241,0.8)" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            <p>Lepas komponen di sini</p>
+          </div>
+        </div>
+
+        <!-- Mode overlay label -->
+        <div id="modeLabel" class="mode-label-design">MODE: DESAIN</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── RIGHT PANEL: Code Editor + Properties ──────────────────── -->
+  <div id="panelRight" class="panel">
+
+    <!-- Sub-tabs -->
+    <div class="panel-tabs" id="rightTabs">
+      <button class="panel-tab active" data-panel="editor">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        Kode
+      </button>
+      <button class="panel-tab" data-panel="properties">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 19.07l1.41-1.41M19.07 19.07l-1.41-1.41M4.93 4.93l1.41 1.41M21 12h-2M5 12H3M12 3V1M12 23v-2"/></svg>
+        Properti
+      </button>
+      <button class="panel-tab" data-panel="connections">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+        Koneksi
+      </button>
+      <button class="panel-tab" data-panel="calibration">⚙️ Kalibrasi</button>
+      <button class="panel-tab" data-panel="blockly">🔲 Blok</button>
+    </div>
+
+    <!-- Code Editor Panel -->
+    <div class="panel-body active" id="panel-editor">
+      <div class="editor-toolbar">
+        <div class="board-select-wrap">
+          <select id="activeBoard" class="board-select">
+            <option value="">— Pilih Board —</option>
+          </select>
+        </div>
+        <div class="editor-actions">
+          <button class="ed-btn" id="btnFormat" title="Format Kode (Alt+Shift+F)">⟳ Format</button>
+          <button class="ed-btn" id="btnCommentLine" title="Komentar (Ctrl+/)">// </button>
+        </div>
+      </div>
+      <div id="codeEditor">
+        <!-- CodeMirror mounts here -->
+      </div>
+    </div>
+
+    <!-- Properties Panel -->
+    <div class="panel-body" id="panel-properties">
+      <div class="no-selection-msg" id="noSelectionMsg">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        <p>Klik komponen untuk melihat properti</p>
+      </div>
+      <div id="propertiesContent" class="hidden">
+        <!-- Dynamic properties form -->
+      </div>
+    </div>
+
+    <!-- Connections Panel -->
+    <div class="panel-body" id="panel-connections">
+      <div class="connections-header">
+        <h3>Koneksi Antar Board</h3>
+        <button class="add-conn-btn" id="btnAddConnection">+ Tambah Koneksi</button>
+      </div>
+      <div id="connectionsList">
+        <div class="empty-connections">
+          <p>Belum ada koneksi antar board.</p>
+          <p class="hint">Tambahkan koneksi UART, I2C, SPI, GPIO, NRF24, atau BT.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Calibration Panel -->
+    <div class="panel-body" id="panel-calibration">
+      <div class="no-selection-msg">
+        <p>Pilih komponen untuk mengkalibrasi.</p>
+      </div>
+    </div>
+
+    <!-- Blockly Panel -->
+    <div class="panel-body" id="panel-blockly">
+      <div class="blockly-toolbar">
+        <button class="blockly-tab active" data-view="blocks">🔲 Blok</button>
+        <button class="blockly-tab" data-view="flowchart">📊 Flowchart</button>
+        <button class="blockly-tab" data-view="code">📄 Kode Hasil</button>
+      </div>
+      <div id="blocklyWorkspace">
+        <!-- Blockly mounts here -->
+      </div>
+    </div>
+
+  </div>
+</div><!-- /appLayout -->
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!--  BOTTOM PANELS                                               -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<div id="bottomPanels">
+
+  <!-- Bottom Tabs -->
+  <div id="bottomTabs">
+    <button class="bottom-tab active" data-panel="serial">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l18 0M3 6h18M3 18h18" stroke-linecap="round"/></svg>
+      Serial Monitor
+    </button>
+    <button class="bottom-tab" data-panel="oscilloscope">📈 Osiloskop</button>
+    <button class="bottom-tab" data-panel="logic">📊 Logic Analyzer</button>
+    <button class="bottom-tab" data-panel="multimeter">🔬 Multimeter</button>
+    <button class="bottom-tab" data-panel="signal-gen">📡 Signal Gen</button>
+    <button class="bottom-tab" data-panel="compiler-out">⚙️ Compiler</button>
+    <button class="bottom-tab" data-panel="debugger">🐛 Debugger</button>
+    <button class="bottom-tab" data-panel="iot">🌐 IoT Console</button>
+    <div class="bottom-resize-handle" id="bottomResizeHandle"></div>
+  </div>
+
+  <!-- Serial Monitor -->
+  <div class="bottom-panel active" id="panel-serial">
+    <div class="serial-toolbar">
+      <select id="serialBoardSelect" class="serial-select">
+        <option value="all">📋 Semua Board</option>
+      </select>
+      <select id="serialBaud" class="serial-select">
+        <option value="9600">9600</option>
+        <option value="115200" selected>115200</option>
+        <option value="57600">57600</option>
+        <option value="38400">38400</option>
+      </select>
+      <select id="serialLineEnd" class="serial-select">
+        <option value="\n">Newline</option>
+        <option value="\r\n">CR+LF</option>
+        <option value="">No Line End</option>
+      </select>
+      <button class="serial-btn" id="btnSerialClear">🗑 Clear</button>
+      <button class="serial-btn" id="btnSerialSave">💾 Save</button>
+      <button class="serial-btn" id="btnSerialScroll">↓ Auto-scroll</button>
+      <input type="text" id="serialInput" class="serial-input" placeholder="Kirim data ke board...">
+      <button class="serial-send-btn" id="btnSerialSend">Send</button>
+    </div>
+    <div class="serial-output" id="serialOutput"></div>
+  </div>
+
+  <!-- Oscilloscope Panel -->
+  <div class="bottom-panel" id="panel-oscilloscope">
+    <div class="instrument-toolbar">
+      <div class="ch-control">
+        <span class="ch-label" style="color:#f59e0b">CH1:</span>
+        <select class="ch-pin-sel" id="osc-ch1-pin"><option>Pin 9</option></select>
+        <select class="ch-scale-sel" id="osc-ch1-scale"><option>1V/div</option><option>2V/div</option><option>5V/div</option></select>
+      </div>
+      <div class="ch-control">
+        <span class="ch-label" style="color:#10b981">CH2:</span>
+        <select class="ch-pin-sel" id="osc-ch2-pin"><option>OFF</option><option>Pin 6</option></select>
+        <select class="ch-scale-sel" id="osc-ch2-scale"><option>1V/div</option></select>
+      </div>
+      <div class="ch-control">
+        <span class="ch-label" style="color:#6366f1">CH3:</span>
+        <select class="ch-pin-sel" id="osc-ch3-pin"><option>OFF</option></select>
+      </div>
+      <div class="ch-control">
+        <span class="ch-label" style="color:#ef4444">CH4:</span>
+        <select class="ch-pin-sel" id="osc-ch4-pin"><option>OFF</option></select>
+      </div>
+      <div class="tb-control">
+        <span>Timebase:</span>
+        <select id="oscTimebase"><option>1ms/div</option><option>2ms/div</option><option>5ms/div</option><option>10ms/div</option></select>
+      </div>
+      <div class="osc-measures" id="oscMeasures">
+        <span>CH1: Vpp=—  Freq=—  Duty=—</span>
+      </div>
+    </div>
+    <canvas id="oscCanvas" class="instrument-canvas"></canvas>
+  </div>
+
+  <!-- Logic Analyzer Panel -->
+  <div class="bottom-panel" id="panel-logic">
+    <div class="instrument-toolbar">
+      <span>Sample: 10MHz</span>
+      <button class="instr-btn" id="btnLogicCapture">▶ Capture</button>
+      <button class="instr-btn" id="btnLogicClear">Clear</button>
+      <select id="logicDecoder">
+        <option value="none">— Decoder —</option>
+        <option value="i2c">I2C</option>
+        <option value="spi">SPI</option>
+        <option value="uart">UART</option>
+        <option value="1wire">1-Wire</option>
+        <option value="pwm">PWM</option>
+      </select>
+    </div>
+    <div id="logicAnalyzerView">
+      <canvas id="logicCanvas" class="instrument-canvas"></canvas>
+      <div id="logicDecodeTable"></div>
+    </div>
+  </div>
+
+  <!-- Multimeter Panel -->
+  <div class="bottom-panel" id="panel-multimeter">
+    <div class="multimeter-grid">
+      <div class="multimeter-unit" id="multimeter1">
+        <div class="mm-header">Multimeter 1</div>
+        <select class="mm-mode"><option>DC Volt</option><option>AC Volt</option><option>DC Curr</option><option>AC Curr</option><option>Resistance</option><option>Freq</option></select>
+        <div class="mm-display">— V</div>
+        <div class="mm-probes">
+          <div>+ <select class="mm-probe"><option>Pin A0</option></select></div>
+          <div>- <select class="mm-probe"><option>GND</option></select></div>
+        </div>
+      </div>
+      <div class="multimeter-unit" id="multimeter2">
+        <div class="mm-header">Multimeter 2</div>
+        <select class="mm-mode"><option>DC Volt</option></select>
+        <div class="mm-display">— V</div>
+        <div class="mm-probes">
+          <div>+ <select class="mm-probe"><option>OFF</option></select></div>
+          <div>- <select class="mm-probe"><option>GND</option></select></div>
+        </div>
+      </div>
+      <div class="mm-trend-chart">
+        <canvas id="mmTrendCanvas"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Signal Generator Panel -->
+  <div class="bottom-panel" id="panel-signal-gen">
+    <div class="siggen-layout">
+      <div class="siggen-controls">
+        <label>Output Pin: <select id="sgPin"><option>Pin A0</option></select></label>
+        <div class="wave-select">
+          <button class="wave-btn active" data-wave="sine">∿ Sine</button>
+          <button class="wave-btn" data-wave="square">⊓ Square</button>
+          <button class="wave-btn" data-wave="triangle">∧ Triangle</button>
+          <button class="wave-btn" data-wave="noise">≋ Noise</button>
+        </div>
+        <label>Frekuensi: <input type="number" id="sgFreq" value="1000"> Hz</label>
+        <label>Amplitudo: <input type="number" id="sgAmp" value="3.3" step="0.1"> V</label>
+        <label>Offset DC: <input type="number" id="sgOffset" value="0" step="0.1"> V</label>
+        <label>Duty Cycle: <input type="number" id="sgDuty" value="50"> %</label>
+        <button class="sim-btn" id="btnSGStart">▶ Generate</button>
+        <button class="sim-btn sim-stop" id="btnSGStop">⏹ Stop</button>
+      </div>
+      <canvas id="sgCanvas" class="instrument-canvas"></canvas>
+    </div>
+  </div>
+
+  <!-- Compiler Output Panel -->
+  <div class="bottom-panel" id="panel-compiler-out">
+    <div class="compiler-toolbar">
+      <select id="compilerBoard" class="serial-select">
+        <option value="">— Pilih Board —</option>
+      </select>
+      <select id="uploadPort" class="serial-select">
+        <option value="">— Port COM —</option>
+      </select>
+      <button class="serial-btn" id="btnRefreshPorts">🔄 Refresh</button>
+      <button class="action-btn compile" id="btnCompileBottom">⚙️ Kompilasi</button>
+      <button class="action-btn upload" id="btnUploadBottom">⬆️ Upload</button>
+      <button class="serial-btn" id="btnCompilerClear">🗑 Clear</button>
+    </div>
+    <div class="serial-output" id="compilerOutput">
+      <div class="compiler-welcome">
+        <div class="comp-logo-big">⚙️</div>
+        <p>CircuitForge menggunakan <strong>Arduino CLI</strong> untuk kompilasi dan upload nyata.</p>
+        <p>Pastikan Arduino CLI sudah terinstall.</p>
+        <button class="action-btn compile" id="btnSetupCLI">Setup Arduino CLI</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Debugger Panel -->
+  <div class="bottom-panel" id="panel-debugger">
+    <div class="debugger-layout">
+      <div class="debug-controls">
+        <button class="debug-btn" id="dbgContinue" title="Lanjutkan (F5)">▶</button>
+        <button class="debug-btn" id="dbgPause" title="Pause (F6)">⏸</button>
+        <button class="debug-btn" id="dbgStepOver" title="Step Over (F10)">⤵</button>
+        <button class="debug-btn" id="dbgStepInto" title="Step Into (F11)">⤶</button>
+        <button class="debug-btn" id="dbgStop" title="Stop">⏹</button>
+      </div>
+      <div class="debug-panels">
+        <div class="debug-section">
+          <h4>Variables</h4>
+          <div id="debugVars" class="debug-list"></div>
+        </div>
+        <div class="debug-section">
+          <h4>Watch</h4>
+          <div id="debugWatch" class="debug-list">
+            <button class="add-watch-btn">+ Add Expression</button>
+          </div>
+        </div>
+        <div class="debug-section">
+          <h4>Memory (RAM)</h4>
+          <div id="debugMemory" class="debug-memory mono"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- IoT Console Panel -->
+  <div class="bottom-panel" id="panel-iot">
+    <div class="iot-layout">
+      <div class="iot-sidebar">
+        <h3>IoT Connections</h3>
+        <div class="iot-service" id="mqttService">
+          <div class="iot-service-header">
+            <span>📡 MQTT</span>
+            <span class="iot-status disconnected" id="mqttStatus">Terputus</span>
+          </div>
+          <div class="iot-service-body">
+            <input type="text" id="mqttHost" placeholder="broker.hivemq.com" class="iot-input">
+            <input type="number" id="mqttPort" value="1883" class="iot-input" style="width:80px">
+            <button class="iot-btn" id="btnMQTTConnect">Sambung</button>
+          </div>
+        </div>
+        <div class="iot-service">
+          <div class="iot-service-header">
+            <span>🔷 Blynk</span>
+            <span class="iot-status disconnected" id="blynkStatus">Terputus</span>
+          </div>
+          <div class="iot-service-body">
+            <input type="text" id="blynkToken" placeholder="Auth Token Blynk" class="iot-input">
+            <button class="iot-btn" id="btnBlynkConnect">Sambung</button>
+          </div>
+        </div>
+        <div class="iot-service">
+          <div class="iot-service-header"><span>🌐 HTTP</span></div>
+          <div class="iot-service-body">
+            <input type="text" id="httpUrl" placeholder="https://api.example.com" class="iot-input">
+            <button class="iot-btn" id="btnHttpTest">Test GET</button>
+          </div>
+        </div>
+      </div>
+      <div class="iot-main">
+        <div class="iot-console-toolbar">
+          <span>Console Log</span>
+          <button class="serial-btn" id="btnIoTClear">🗑 Clear</button>
+          <select id="mqttPublishTopic" style="width:160px" class="serial-select"><option>home/sensor/temp</option></select>
+          <input type="text" id="mqttPublishPayload" placeholder="Payload" class="serial-input" style="width:100px">
+          <button class="serial-send-btn" id="btnMQTTPublish">Publish</button>
+        </div>
+        <div class="serial-output" id="iotConsoleOutput"></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /bottomPanels -->
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!--  MODALS                                                       -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+
+<!-- Add Board Modal -->
+<div class="modal-overlay hidden" id="modalAddBoard">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Tambah Mikrokontroler</h2>
+      <button class="modal-close" data-close="modalAddBoard">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="board-picker-grid" id="boardPickerGrid">
+        <!-- dynamically filled -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add Connection Modal -->
+<div class="modal-overlay hidden" id="modalAddConn">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Tambah Koneksi Antar Board</h2>
+      <button class="modal-close" data-close="modalAddConn">✕</button>
+    </div>
+    <div class="modal-body">
+      <label>Jenis Koneksi:
+        <select id="connType" class="modal-select">
+          <option value="uart">UART / Serial</option>
+          <option value="i2c">I2C Bus</option>
+          <option value="spi">SPI Bus</option>
+          <option value="gpio">GPIO Wire</option>
+          <option value="nrf24">NRF24L01 Wireless</option>
+          <option value="bt">Bluetooth HC-05</option>
+        </select>
+      </label>
+      <div class="conn-form-row">
+        <div>
+          <label>Board Pengirim: <select id="connFromBoard" class="modal-select"></select></label>
+          <label>Pin TX/SDA: <select id="connFromPin" class="modal-select"></select></label>
+        </div>
+        <div class="conn-arrow">→</div>
+        <div>
+          <label>Board Penerima: <select id="connToBoard" class="modal-select"></select></label>
+          <label>Pin RX/SCL: <select id="connToPin" class="modal-select"></select></label>
+        </div>
+      </div>
+      <div id="connExtraConfig"></div>
+      <button class="sim-btn" id="btnConnSave">✅ Simpan Koneksi</button>
+    </div>
+  </div>
+</div>
+
+<!-- Library Manager Modal -->
+<div class="modal-overlay hidden" id="modalLibraryManager">
+  <div class="modal modal-wide">
+    <div class="modal-header">
+      <h2>📚 Library Manager</h2>
+      <button class="modal-close" data-close="modalLibraryManager">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="lib-toolbar">
+        <div class="lib-tabs">
+          <button class="lib-tab active" data-lib="all">Semua</button>
+          <button class="lib-tab" data-lib="installed">Terinstall</button>
+          <button class="lib-tab" data-lib="stubs">Built-in Stubs</button>
+        </div>
+        <input type="search" id="libSearch" placeholder="Cari library..." class="search-input" style="width:280px">
+      </div>
+      <div id="libList" class="lib-list">
+        <!-- Dynamic library list -->
+        <div class="lib-loading">🔍 Memuat library...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Settings Modal -->
+<div class="modal-overlay hidden" id="modalSettings">
+  <div class="modal modal-wide">
+    <div class="modal-header">
+      <h2>⚙️ Pengaturan</h2>
+      <button class="modal-close" data-close="modalSettings">✕</button>
+    </div>
+    <div class="modal-body settings-layout">
+      <div class="settings-sidebar">
+        <button class="settings-nav active" data-section="general">Umum</button>
+        <button class="settings-nav" data-section="compiler">Compiler</button>
+        <button class="settings-nav" data-section="libraries">Library Paths</button>
+        <button class="settings-nav" data-section="appearance">Tampilan</button>
+        <button class="settings-nav" data-section="simulation">Simulasi</button>
+        <button class="settings-nav" data-section="iot">IoT Default</button>
+      </div>
+      <div class="settings-content" id="settingsContent">
+        <!-- Dynamic settings content -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Status Bar -->
+<div id="statusBar">
+  <div class="status-left">
+    <span id="statusText">Siap</span>
+    <span class="status-sep">|</span>
+    <span id="statusBoard">Board: —</span>
+    <span class="status-sep">|</span>
+    <span id="statusComp">Komponen: 0</span>
+  </div>
+  <div class="status-right">
+    <span id="statusMode">Mode: Desain</span>
+    <span class="status-sep">|</span>
+    <span id="statusFPS">60 FPS</span>
+    <span class="status-sep">|</span>
+    <span id="statusTime">00:00:00</span>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!--  SCRIPTS                                                      -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+
+<!-- Three.js (3D Engine) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<!-- TWEEN for smooth animation -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/18.6.4/tween.umd.js"></script>
+<!-- CodeMirror (Code Editor) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/dracula.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/clike/clike.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchbrackets.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closebrackets.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/comment/comment.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/hint/show-hint.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/hint/show-hint.min.css">
+
+<!-- App modules -->
+<script src="js/multi-board/bus-router.js"></script>
+<script src="js/multi-board/board-manager.js"></script>
+<script src="js/simulator/stubs/index.js"></script>
+<script src="js/simulator/stub-loader.js"></script>
+<script src="js/simulator/runtime.js"></script>
+<script src="js/simulator/core.js"></script>
+<script src="js/canvas3d/sketch-material.js"></script>
+<script src="js/canvas3d/component-3d/base-component.js"></script>
+<script src="js/canvas3d/component-3d/boards-3d.js"></script>
+<script src="js/canvas3d/component-3d/sensors-3d.js"></script>
+<script src="js/canvas3d/component-3d/actuators-3d.js"></script>
+<script src="js/canvas3d/component-3d/displays-3d.js"></script>
+<script src="js/canvas3d/component-3d/robotics-3d.js"></script>
+<script src="js/canvas3d/wiring-3d.js"></script>
+<script src="js/canvas3d/scene-manager.js"></script>
+<script src="js/instruments/oscilloscope.js"></script>
+<script src="js/instruments/logic-analyzer.js"></script>
+<script src="js/instruments/multimeter.js"></script>
+<script src="js/instruments/signal-generator.js"></script>
+<script src="js/calibration/noise-models.js"></script>
+<script src="js/calibration/calibration-engine.js"></script>
+<script src="js/calibration/calibration-manager.js"></script>
+<script src="js/iot/mqtt-client.js"></script>
+<script src="js/multi-board/connection-editor.js"></script>
+<script src="js/editor.js"></script>
+<script src="js/serial.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
